@@ -8,6 +8,7 @@ struct file
 	int isdir;
 	int exec;
 } *file_list;
+struct file *files_map[65536];
 int num_files;
 char selected_file[512];
 void release_files(void)
@@ -51,8 +52,13 @@ int file_exists(char *name)
 void get_files(void)
 {
 	struct file *file,*p,*pp;
+	struct file *file_list_end;
 	struct win32_find_data_a fdata;
 	void *handle;
+	int files_map_x;
+	memset(files_map,0,sizeof(files_map));
+	files_map_x=0;
+	file_list_end=NULL;
 	free(cwd);
 	if(is_root)
 	{
@@ -98,6 +104,7 @@ void get_files(void)
 						file->name[2]=0;
 						file->next=file_list;
 						file_list=file;
+						files_map[0]=file;
 						++num_files;
 					}
 					else
@@ -127,15 +134,28 @@ void get_files(void)
 					file->exec=0;
 					strcpy(file->name,fdata.name);
 					if(name_length>=4&&
-					(!strcmp(file->name+name_length-4,".exe")||
-					!strcmp(file->name+name_length-4,".com")||
-					!strcmp(file->name+name_length-4,".cmd")||
-					!strcmp(file->name+name_length-4,".bat")))
+					(!strcmp(file->name+name_length-4,".exe")||!strcmp(file->name+name_length-4,".EXE")||
+					!strcmp(file->name+name_length-4,".com")||!strcmp(file->name+name_length-4,".COM")||
+					!strcmp(file->name+name_length-4,".cmd")||!strcmp(file->name+name_length-4,".CMD")||
+					!strcmp(file->name+name_length-4,".bat")||!strcmp(file->name+name_length-4,".BAT")))
 					{
 						file->exec=1;
 					}
 					p=file_list;
 					pp=NULL;
+					{
+						int x;
+						x=0;
+						while(x<65536&&files_map[x])
+						{
+							if(strcmp(file->name,files_map[x]->name)>0)
+							{
+								pp=files_map[x];
+								p=pp->next;
+							}
+							++x;
+						}
+					}
 					while(p)
 					{
 						if(strcmp(file->name,p->name)<0)
@@ -154,6 +174,15 @@ void get_files(void)
 						pp->next=file;
 					}
 					file->next=p;
+					if(p==NULL)
+					{
+						file_list_end=file;
+					}
+					if(num_files%64==0&&files_map_x<65536)
+					{
+						files_map[files_map_x]=file;
+						++files_map_x;
+					}
 					++num_files;
 				}
 			}
@@ -168,6 +197,18 @@ void get_files(void)
 	if(!file_selected_exists)
 	{
 		selected_file[0]=0;
+	}
+	memset(files_map,0,sizeof(files_map));
+	files_map_x=0;
+	file=file_list;
+	while(file&&files_map_x<8192*64)
+	{
+		if(files_map_x%64==0)
+		{
+			files_map[files_map_x/64]=file;
+		}
+		file=file->next;
+		++files_map_x;
 	}
 }
 
@@ -303,10 +344,17 @@ void p_files(void)
 {
 	struct file *file;
 	char buf[256];
-	file=file_list;
 	int name_len;
 	int y;
-	y=24-current_y;
+	y=24-current_y%(24*64);
+	if(current_y>=8192*64*24)
+	{
+		file=files_map[8191];
+	}
+	else
+	{
+		file=files_map[current_y/(24*64)];
+	}
 	while(file)
 	{
 		if(y>=0&&y<WINH)

@@ -284,7 +284,7 @@ int main(int argc,char **argv,void *hInstance)
 	{
 		return 0;
 	}
-	SetTimer(hwnd,0,133,NULL);
+	SetTimer(hwnd,0,100,NULL);
 	while(GetMessageA(&msg,NULL,0,0)>0)
 	{
 		TranslateMessage(&msg);
