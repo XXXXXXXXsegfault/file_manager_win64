@@ -49,6 +49,7 @@ struct _Rect
 };
 #define IDI_APPLICATION ((char *)0x7f00)
 #define IDC_ARROW ((char *)0x7f00)
+#define CW_USEDEFAULT ((int)0x80000000)
 #define WS_EX_WINDOWEDGE 0x100
 #define WS_EX_CLIENTEDGE 0x200
 #define WS_VISIBLE 0x10000000

@@ -18,32 +18,32 @@ void update_dialog(int type,int x,int y)
 	}
 	else if(type==1) // context menu
 	{
-		MoveWindow(hdialog,x+rect.left+9,y+rect.top+32,64,120,0);
-		ShowWindow(hdialog,5);
+		MoveWindow(hdialog,x+rect.left+9,y+rect.top+38,64,120,0);
+		ShowWindow(hdialog,4);
 		dialog_paint();
 	}
 	else if(type==2) // input
 	{
-		MoveWindow(hdialog,x+rect.left+9,y+rect.top+32,300,300,0);
-		ShowWindow(hdialog,5);
+		MoveWindow(hdialog,x+rect.left+9,y+rect.top+38,300,300,0);
+		ShowWindow(hdialog,4);
 		dialog_paint();
 	}
 	else if(type==3) // remove
 	{
-		MoveWindow(hdialog,x+rect.left+6,y+rect.top+6,300,300,0);
-		ShowWindow(hdialog,5);
+		MoveWindow(hdialog,x+rect.left+6,y+rect.top+12,300,300,0);
+		ShowWindow(hdialog,4);
 		dialog_paint();
 	}
 	else if(type==4) // status
 	{
 		MoveWindow(hdialog,20,20,300,600,0);
-		ShowWindow(hdialog,5);
+		ShowWindow(hdialog,4);
 		dialog_paint();
 	}
 	else if(type==5) // 'new' menu
 	{
-		MoveWindow(hdialog,x+rect.left+9,y+rect.top+32,80,48,0);
-		ShowWindow(hdialog,5);
+		MoveWindow(hdialog,x+rect.left+9,y+rect.top+38,80,48,0);
+		ShowWindow(hdialog,4);
 		dialog_paint();
 	}
 }
@@ -262,11 +262,7 @@ void dialog_proc(unsigned int Message,unsigned long wParam,unsigned long lParam)
 			}
 			else if(y<48)
 			{
-				char buf[520];
-				strcpy(buf,"\".\\");
-				strcat(buf,selected_file);
-				strcat(buf,"\"");
-				exec_program(buf);
+				exec_program(selected_file,NULL);
 			}
 			else if(y<72)
 			{
@@ -350,7 +346,7 @@ void dialog_proc(unsigned int Message,unsigned long wParam,unsigned long lParam)
 					}
 					if(input_type==5&&cwd)
 					{
-						exec_program(input_buf);
+						exec_program(NULL,input_buf);
 					}
 				}
 			}

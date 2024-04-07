@@ -8,7 +8,7 @@ struct file
 	int isdir;
 	int exec;
 } *file_list;
-struct file *files_map[65536];
+struct file *files_map[262144];
 int num_files;
 char selected_file[512];
 void release_files(void)
@@ -146,12 +146,15 @@ void get_files(void)
 					{
 						int x;
 						x=0;
-						while(x<65536&&files_map[x])
+						while(x<262144&&files_map[x])
 						{
 							if(strcmp(file->name,files_map[x]->name)>0)
 							{
-								pp=files_map[x];
-								p=pp->next;
+								if(!pp||strcmp(pp->name,files_map[x]->name)<0)
+								{
+									pp=files_map[x];
+									p=pp->next;
+								}
 							}
 							++x;
 						}
@@ -178,7 +181,7 @@ void get_files(void)
 					{
 						file_list_end=file;
 					}
-					if(num_files%64==0&&files_map_x<65536)
+					if(num_files%128==0&&files_map_x<262144)
 					{
 						files_map[files_map_x]=file;
 						++files_map_x;
@@ -376,19 +379,19 @@ void p_files(void)
 				icon_paint(icon_file,4,y+4);
 			}
 			name_len=strlen(file->name);
-			if(name_len>20)
+			if(name_len>max_namelen)
 			{
-				name_len=20;
+				name_len=max_namelen;
 			}
 			p_str(file->name,name_len,24,y+4,0x000000,pbuf,WINW,WINH);
 			if(file->isdir!=1)
 			{
 				buf[0]=0;
 				size_to_str(file->size,buf);
-				p_str(buf,strlen(buf),200,y+4,0x000000,pbuf,WINW,WINH);
+				p_str(buf,strlen(buf),40+max_namelen*8,y+4,0x000000,pbuf,WINW,WINH);
 				buf[0]=0;
 				time_to_str(file->atime,buf);
-				p_str(buf,strlen(buf),400,y+4,0x000000,pbuf,WINW,WINH);
+				p_str(buf,strlen(buf),240+max_namelen*8,y+4,0x000000,pbuf,WINW,WINH);
 			}
 		}
 		y+=24;
@@ -645,7 +648,7 @@ void copy_file(char *src,char *dst)
 	{
 		return;
 	}
-	handle=CreateThread(NULL,0,_T_file_op,fop,0,NULL);
+	handle=CreateThread(NULL,0x10000000,_T_file_op,fop,0,NULL);
 	if(handle)
 	{
 		CloseHandle(handle);
@@ -664,7 +667,7 @@ void move_file(char *src,char *dst)
 	{
 		return;
 	}
-	handle=CreateThread(NULL,0,_T_file_op,fop,0,NULL);
+	handle=CreateThread(NULL,0x10000000,_T_file_op,fop,0,NULL);
 	if(handle)
 	{
 		CloseHandle(handle);
@@ -683,7 +686,7 @@ void remove_file(char *name)
 	{
 		return;
 	}
-	handle=CreateThread(NULL,0,_T_file_op,fop,0,NULL);
+	handle=CreateThread(NULL,0x10000000,_T_file_op,fop,0,NULL);
 	if(handle)
 	{
 		CloseHandle(handle);

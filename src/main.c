@@ -5,6 +5,7 @@
 #include "rect.c"
 #include "font.c"
 int WINW,WINH;
+int max_namelen;
 struct wndclassex wc,wc2;
 int paint,refresh;
 void *dc,*memdc,*bmp;
@@ -79,15 +80,16 @@ long WndProc(void *hwnd,unsigned int Message,unsigned long wParam,unsigned long 
 		struct _Rect winsize;
 		GetWindowRect(hwnd,&winsize);
 		WINW=winsize.right-winsize.left-16;
-		WINH=winsize.bottom-winsize.top-39;
-		if(WINW<64)
+		WINH=winsize.bottom-winsize.top-47;
+		if(WINW<500)
 		{
-			WINW=64;
+			WINW=500;
 		}
 		if(WINH<64)
 		{
 			WINH=64;
 		}
+		max_namelen=(WINW-480)/8;
 		display_all();
 		return 0;
 	}
@@ -251,8 +253,10 @@ int main(int argc,char **argv,void *hInstance)
 {
 	struct msg msg;
 	init_icons();
+	SetProcessDPIAware();
 	WINW=640;
 	WINH=480;
+	max_namelen=(WINW-480)/8;
 	wc.cbSize=sizeof(wc);
 	wc.hInstance=hInstance;
 	wc.lpfnWndProc=_WndProc;
@@ -269,12 +273,14 @@ int main(int argc,char **argv,void *hInstance)
 	wc2.lpfnWndProc=_WndProc;
 	wc2.lpszClassName="TEST2";
 	wc2.hbrBackground=(void *)8;
+	wc2.hCursor=LoadCursorA(NULL,IDC_ARROW);
+	wc2.hIcon=LoadIconA(NULL,IDI_APPLICATION);
 	if(!RegisterClassExA(&wc2))
 	{
 		return 0;
 	}
 	get_files();
-	hwnd=CreateWindowExA(WS_EX_WINDOWEDGE,"TEST","Files (Press R to run a command)",WS_VISIBLE|WS_SYSMENU|WS_CAPTION|WS_THICKFRAME,0,0,WINW+16,WINH+39,NULL,NULL,hInstance,NULL);
+	hwnd=CreateWindowExA(WS_EX_WINDOWEDGE,"TEST","Files (Press R to run a command)",WS_SYSMENU|WS_CAPTION|WS_THICKFRAME,CW_USEDEFAULT,CW_USEDEFAULT,WINW+16,WINH+47,NULL,NULL,hInstance,NULL);
 	if(hwnd==NULL)
 	{
 		return 0;
@@ -284,6 +290,7 @@ int main(int argc,char **argv,void *hInstance)
 	{
 		return 0;
 	}
+	ShowWindow(hwnd,5);
 	SetTimer(hwnd,0,100,NULL);
 	while(GetMessageA(&msg,NULL,0,0)>0)
 	{
