@@ -76,6 +76,10 @@ long WndProc(void *hwnd,unsigned int Message,unsigned long wParam,unsigned long 
 	{
 		PostQuitMessage(0);
 	}
+	if(Message==WM_ERASEBKGND)
+	{
+		InvalidateRect(hwnd,NULL,0);
+	}
 	if(Message==WM_PAINT)
 	{
 		struct paintstruct ps;
