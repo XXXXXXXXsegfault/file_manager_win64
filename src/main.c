@@ -7,6 +7,7 @@
 int WINW,WINH;
 int max_namelen;
 struct wndclassex wc,wc2;
+int wdiff,hdiff;
 int paint,refresh;
 void *dc,*memdc,*bmp;
 unsigned int *pbuf;
@@ -75,12 +76,14 @@ long WndProc(void *hwnd,unsigned int Message,unsigned long wParam,unsigned long 
 	{
 		PostQuitMessage(0);
 	}
-	if(Message==WM_ERASEBKGND)
+	if(Message==WM_PAINT)
 	{
+		struct paintstruct ps;
 		struct _Rect winsize;
+		BeginPaint(hwnd,&ps);
 		GetWindowRect(hwnd,&winsize);
-		WINW=winsize.right-winsize.left-16;
-		WINH=winsize.bottom-winsize.top-47;
+		WINW=winsize.right-winsize.left-wdiff;
+		WINH=winsize.bottom-winsize.top-hdiff;
 		if(WINW<500)
 		{
 			WINW=500;
@@ -91,19 +94,12 @@ long WndProc(void *hwnd,unsigned int Message,unsigned long wParam,unsigned long 
 		}
 		max_namelen=(WINW-480)/8;
 		display_all();
-		return 0;
-	}
-	if(Message==WM_PAINT)
-	{
-		struct paintstruct ps;
-		BeginPaint(hwnd,&ps);
-		display_all();
 		EndPaint(hwnd,&ps);
 	}
 	if(Message==WM_TIMER)
 	{
 		get_files();
-		display_all();
+		InvalidateRect(hwnd,NULL,0);
 	}
 	if(Message==WM_KEYDOWN)
 	{
@@ -140,7 +136,7 @@ long WndProc(void *hwnd,unsigned int Message,unsigned long wParam,unsigned long 
 			input_buf[0]=0;
 			update_dialog(2,WINW,0);
 		}
-		display_all();
+		InvalidateRect(hwnd,NULL,0);
 	}
 	if(Message==WM_MOUSEWHEEL)
 	{
@@ -175,7 +171,7 @@ long WndProc(void *hwnd,unsigned int Message,unsigned long wParam,unsigned long 
 				current_y=0;
 			}
 		}
-		display_all();
+		InvalidateRect(hwnd,NULL,0);
 	}
 	if(Message==WM_LBUTTONUP)
 	{
@@ -252,6 +248,7 @@ asm "ret"
 int main(int argc,char **argv,void *hInstance)
 {
 	struct msg msg;
+	struct _Rect wrect,crect;
 	init_icons();
 	SetProcessDPIAware();
 	WINW=640;
@@ -280,11 +277,16 @@ int main(int argc,char **argv,void *hInstance)
 		return 0;
 	}
 	get_files();
-	hwnd=CreateWindowExA(WS_EX_WINDOWEDGE,"TEST","Files (Press R to run a command)",WS_SYSMENU|WS_CAPTION|WS_THICKFRAME,CW_USEDEFAULT,CW_USEDEFAULT,WINW+16,WINH+47,NULL,NULL,hInstance,NULL);
+	hwnd=CreateWindowExA(WS_EX_WINDOWEDGE,"TEST","Files (Press R to run a command)",WS_SYSMENU|WS_CAPTION|WS_THICKFRAME,CW_USEDEFAULT,CW_USEDEFAULT,WINW,WINH,NULL,NULL,hInstance,NULL);
 	if(hwnd==NULL)
 	{
 		return 0;
 	}
+	GetWindowRect(hwnd,&wrect);
+	GetClientRect(hwnd,&crect);
+	wdiff=(wrect.right-wrect.left)-(crect.right-crect.left);
+	hdiff=(wrect.bottom-wrect.top)-(crect.bottom-crect.top);
+	MoveWindow(hwnd,wrect.left,wrect.top,WINW+wdiff,WINH+hdiff,0);
 	hdialog=CreateWindowExA(0,"TEST2","Files",WS_POPUP,0,0,300,300,hwnd,NULL,hInstance,NULL);
 	if(hdialog==NULL)
 	{

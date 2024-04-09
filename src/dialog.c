@@ -10,27 +10,31 @@ void dialog_paint(void);
 void update_dialog(int type,int x,int y)
 {
 	struct _Rect rect;
+	struct _Point pos;
 	dialog_type=type;
 	GetWindowRect(hwnd,&rect);
+	pos.x=0;
+	pos.y=0;
+	ClientToScreen(hwnd,&pos);
 	if(!cwd||type==0) // hide
 	{
 		ShowWindow(hdialog,0);
 	}
 	else if(type==1) // context menu
 	{
-		MoveWindow(hdialog,x+rect.left+9,y+rect.top+38,64,120,0);
+		MoveWindow(hdialog,x+pos.x,y+pos.y,64,120,0);
 		ShowWindow(hdialog,4);
 		dialog_paint();
 	}
 	else if(type==2) // input
 	{
-		MoveWindow(hdialog,x+rect.left+9,y+rect.top+38,300,300,0);
+		MoveWindow(hdialog,x+pos.x,y+pos.y,300,300,0);
 		ShowWindow(hdialog,4);
 		dialog_paint();
 	}
 	else if(type==3) // remove
 	{
-		MoveWindow(hdialog,x+rect.left+6,y+rect.top+12,300,300,0);
+		MoveWindow(hdialog,x+pos.x,y+pos.y,300,300,0);
 		ShowWindow(hdialog,4);
 		dialog_paint();
 	}
@@ -42,7 +46,7 @@ void update_dialog(int type,int x,int y)
 	}
 	else if(type==5) // 'new' menu
 	{
-		MoveWindow(hdialog,x+rect.left+9,y+rect.top+38,80,48,0);
+		MoveWindow(hdialog,x+pos.x,y+pos.y,80,48,0);
 		ShowWindow(hdialog,4);
 		dialog_paint();
 	}
